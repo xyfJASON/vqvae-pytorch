@@ -66,7 +66,7 @@ class VQVAE(nn.Module):
         else:
             return quantized_z, quantized_z_st, indices, perplexity
 
-    def generate(self, z: Tensor):
+    def decode(self, z: Tensor):
         return self.decoder(z)
 
     def reconstruct(self, x: Tensor):

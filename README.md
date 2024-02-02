@@ -35,7 +35,7 @@ pip install -r requirements.txt
 ### First-stage training
 
 ```shell
-accelerate-launch train.py [-c CONFIG] [-e EXP_DIR] [--xxx.yyy zzz ...]
+accelerate-launch train_vqvae.py [-c CONFIG] [-e EXP_DIR] [--xxx.yyy zzz ...]
 ```
 
 - This repo uses the [🤗 Accelerate](https://huggingface.co/docs/accelerate/index) library for multi-GPUs/fp16 supports. Please read the [documentation](https://huggingface.co/docs/accelerate/basic_tutorials/launch#using-accelerate-launch) on how to launch the scripts on different platforms.
@@ -45,13 +45,13 @@ accelerate-launch train.py [-c CONFIG] [-e EXP_DIR] [--xxx.yyy zzz ...]
 For example, to train the model on CelebA:
 
 ```shell
-accelerate-launch train.py -c ./configs/vqvae-celeba.yaml -e ./runs/celeba
+accelerate-launch train_vqvae.py -c ./configs/vqvae-celeba.yaml -e ./runs/celeba
 ```
 
 To train the codebook via EMA K-means instead of VQ loss:
 
 ```shell
-accelerate-launch train.py -c ./configs/vqvae-celeba.yaml -e ./runs/celeba --model.params.codebook_update kmeans
+accelerate-launch train_vqvae.py -c ./configs/vqvae-celeba.yaml -e ./runs/celeba --model.params.codebook_update kmeans
 ```
 
 ### Second-stage training (prior learning)

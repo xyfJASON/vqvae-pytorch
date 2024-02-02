@@ -161,7 +161,7 @@ def main():
         loss_vq = F.mse_loss(out['z'].detach(), out['quantized_z'])
         loss_commit = F.mse_loss(out['z'], out['quantized_z'].detach())
         if conf.model.params.codebook_update == 'kmeans':
-            loss_vq = 0.0
+            loss_vq = torch.tensor(0.0, device=device)
 
         loss = loss_rec + loss_vq + conf.train.coef_commit * loss_commit
         optimizer.zero_grad()
