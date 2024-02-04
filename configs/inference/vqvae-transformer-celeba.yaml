@@ -1,0 +1,26 @@
+data:
+  target: datasets.celeba.CelebA
+  params:
+    root: ~/data/CelebA/
+    img_size: 64
+    split: train
+
+vqvae:
+  target: models.vqvae.VQVAE
+  params:
+    img_channels: 3
+    hidden_dim: 256
+    n_resblocks: 2
+    codebook_num: 512
+    codebook_dim: 64
+    codebook_update: learned
+    ema_decay: 0.99
+
+transformer:
+  target: models.transformer.Transformer
+  params:
+    codebook_num: 512
+    embed_dim: 512
+    n_heads: 8
+    n_layers: 12
+    max_tokens: 256
