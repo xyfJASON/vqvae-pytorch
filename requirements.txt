@@ -1,8 +1,10 @@
 tqdm
 numpy
 omegaconf
-tensorboard
 matplotlib
-torch~=2.1.0
-torchvision~=0.16.0
-accelerate~=0.23.0
+tensorboard
+piqa~=1.3.2
+torch~=2.1.1
+torchvision~=0.16.1
+accelerate~=0.24.0
+git+https://github.com/toshas/torch-fidelity.git@master#egg=torch-fidelity

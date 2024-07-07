@@ -5,10 +5,10 @@ import torch
 import shutil
 import datetime
 import importlib
+from omegaconf import OmegaConf, DictConfig
 
 
 def check_freq(freq: int, step: int):
-    assert isinstance(freq, int)
     return freq >= 1 and (step + 1) % freq == 0
 
 
@@ -49,8 +49,12 @@ def get_data_generator(dataloader, tqdm_kwargs):
             yield batch
 
 
+def discard_label(x):
+    return x[0] if isinstance(x, (list, tuple)) else x
+
+
 def find_resume_checkpoint(exp_dir: str, resume: str):
-    """ Checkpoints are named after 'stepxxxxxx/' """
+    """ Checkpoints are named after 'stepxxxxxxx/' """
     if os.path.isdir(resume):
         ckpt_path = resume
     elif resume == 'best':
@@ -68,31 +72,13 @@ def find_resume_checkpoint(exp_dir: str, resume: str):
 
 
 def instantiate_from_config(conf, **extra_params):
+    if isinstance(conf, DictConfig):
+        conf = OmegaConf.to_container(conf)
     module, cls = conf['target'].rsplit('.', 1)
     cls = getattr(importlib.import_module(module, package=None), cls)
-    return cls(**conf.get('params', dict()), **extra_params)
-
-
-class AverageMeter:
-    """
-    Computes and stores the average and current value
-
-    Adapted from https://github.com/huggingface/pytorch-image-models/blob/main/timm/utils/metrics.py
-    """
-    def __init__(self):
-        self.val = 0
-        self.avg = 0
-        self.sum = 0
-        self.count = 0
-
-    def reset(self):
-        self.__init__()
-
-    def update(self, val, n=1):
-        self.val = val
-        self.sum += val * n
-        self.count += n
-        self.avg = self.sum / self.count
+    params = conf.get('params', dict())
+    params.update(extra_params)
+    return cls(**params)
 
 
 def create_exp_dir(

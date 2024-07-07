@@ -31,10 +31,11 @@ vqmodel:
       n_resblocks: 2
 
   quantizer:
-    target: models.quantizer.VectorQuantizer
+    target: models.quantizer.VectorQuantizerEMA
     params:
       codebook_num: 512
       codebook_dim: 64
+      ema_decay: 0.99
 
 
 train:

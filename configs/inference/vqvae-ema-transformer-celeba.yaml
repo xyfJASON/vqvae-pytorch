@@ -1,5 +1,3 @@
-seed: 8888
-
 data:
   name: celeba
   root: ~/data/CelebA/
@@ -11,7 +9,19 @@ dataloader:
   prefetch_factor: 2
 
 
+prior:
+  target: models.prior.transformer.Transformer
+  params:
+    codebook_num: 512
+    embed_dim: 512
+    n_heads: 8
+    n_layers: 12
+    max_tokens: 256
+
+
 vqmodel:
+  downsample_factor: 4
+
   z_channels: 256
   codebook_num: 512
   codebook_dim: 64
@@ -31,23 +41,8 @@ vqmodel:
       n_resblocks: 2
 
   quantizer:
-    target: models.quantizer.VectorQuantizer
+    target: models.quantizer.VectorQuantizerEMA
     params:
       codebook_num: 512
       codebook_dim: 64
-
-
-train:
-  n_steps: 500000
-  batch_size: 256
-
-  coef_commit: 0.25
-
-  print_freq: 100
-  sample_freq: 10000
-  save_freq: 10000
-
-  optim:
-    target: torch.optim.Adam
-    params:
-      lr: 0.0004
+      ema_decay: 0.99

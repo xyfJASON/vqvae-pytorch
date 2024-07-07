@@ -1,3 +1,7 @@
+"""
+Simple convolutional encoder and decoder.
+"""
+
 import torch.nn as nn
 from torch import Tensor
 
@@ -23,7 +27,6 @@ class Encoder(nn.Module):
             img_channels: int = 3,
             hidden_dim: int = 256,
             n_resblocks: int = 2,
-            codebook_dim: int = 64,
     ):
         super().__init__()
         self.downblocks = nn.Sequential(
@@ -37,15 +40,10 @@ class Encoder(nn.Module):
             ResidualBlock(hidden_dim, hidden_dim)
             for _ in range(n_resblocks)
         ])
-        self.proj = nn.Sequential(
-            nn.LeakyReLU(),
-            nn.Conv2d(hidden_dim, codebook_dim, kernel_size=1, stride=1, padding=0),
-        )
 
     def forward(self, x: Tensor):
         x = self.downblocks(x)
         x = self.resblocks(x)
-        x = self.proj(x)
         return x
 
 
@@ -55,10 +53,8 @@ class Decoder(nn.Module):
             img_channels: int = 3,
             hidden_dim: int = 256,
             n_resblocks: int = 2,
-            codebook_dim: int = 64,
     ):
         super().__init__()
-        self.proj = nn.Conv2d(codebook_dim, hidden_dim, kernel_size=1, stride=1, padding=0)
         self.resblocks = nn.Sequential(*[
             ResidualBlock(hidden_dim, hidden_dim)
             for _ in range(n_resblocks)
@@ -74,7 +70,6 @@ class Decoder(nn.Module):
         )
 
     def forward(self, x: Tensor):
-        x = self.proj(x)
         x = self.resblocks(x)
         x = self.upblocks(x)
         return x

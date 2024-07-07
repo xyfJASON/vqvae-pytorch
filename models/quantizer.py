@@ -40,6 +40,7 @@ class VectorQuantizerEMA(VectorQuantizer):
         self.ema_sumz = nn.Parameter(self.codebook.weight.clone())
         self.ema_sumn = nn.Parameter(torch.zeros((codebook_num, )))
 
+    @torch.no_grad()
     def update_codebook(self, new_sumz, new_sumn):
         zero_mask = torch.eq(new_sumn, 0)  # no features are assigned to these codes in this batch, should not update
         self.ema_sumz.data.copy_(self.ema_sumz.data * self.ema_decay + new_sumz * (1 - self.ema_decay))
