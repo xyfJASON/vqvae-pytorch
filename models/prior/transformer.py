@@ -6,15 +6,28 @@ from torch import Tensor
 class CausalSelfAttention(nn.Module):
     def __init__(self, embed_dim: int, n_heads: int):
         super().__init__()
+        assert embed_dim % n_heads == 0
+        self.n_heads = n_heads
+        self.scale = (embed_dim // n_heads) ** -0.5
+
         self.qkv = nn.Linear(embed_dim, embed_dim * 3)
-        self.mhattn = nn.MultiheadAttention(embed_dim, n_heads, batch_first=True)
+        self.proj = nn.Linear(embed_dim, embed_dim)
 
     def forward(self, x: Tensor):
         """ (B, L, D) -> (B, L, D) """
         B, L, D = x.shape
         q, k, v = self.qkv(x).chunk(3, dim=-1)
+        q = q.view(B, L, self.n_heads, D // self.n_heads).transpose(1, 2)  # (B, H, L, D/H)
+        k = k.view(B, L, self.n_heads, D // self.n_heads).transpose(1, 2)  # (B, H, L, D/H)
+        v = v.view(B, L, self.n_heads, D // self.n_heads).transpose(1, 2)  # (B, H, L, D/H)
+
+        attn = (q @ k.transpose(-2, -1)) * self.scale                      # (B, H, L, L)
         causal_mask = torch.triu(torch.ones((L, L), device=x.device), diagonal=1).bool()
-        x = self.mhattn(q, k, v, attn_mask=causal_mask)[0]
+        attn.masked_fill_(causal_mask[None, None, :, :], float('-inf'))
+        attn = torch.softmax(attn, dim=-1)
+        x = (attn @ v).transpose(1, 2).reshape(B, L, D)
+
+        x = self.proj(x)
         return x
 
 
@@ -42,8 +55,8 @@ class Transformer(nn.Module):
         super().__init__()
         self.max_tokens = max_tokens
 
+        self.SOS = nn.Parameter(torch.randn(embed_dim) * 0.02)  # the embedding of <SOS> token
         self.token_emb = nn.Embedding(codebook_num, embed_dim)
-        self.SOS = nn.Parameter(torch.randn(embed_dim) * 0.02)
         self.pos_emb = nn.Parameter(torch.zeros((1, max_tokens, embed_dim)))
 
         self.blocks = nn.Sequential(*[TransformerBlock(embed_dim, n_heads) for _ in range(n_layers)])
@@ -95,10 +108,12 @@ class Transformer(nn.Module):
 
 def _test():
     model = Transformer(codebook_num=512, embed_dim=512, n_heads=8, n_layers=12, max_tokens=256)
+    # model = Transformer(codebook_num=1024, embed_dim=1024, n_heads=16, n_layers=24, max_tokens=512)
     x = torch.randint(0, 100, (10, 50))
     y = model(x)
+    print(model)
     print(y.shape)  # (10, 51, 512)
-    print(sum(p.numel() for p in model.parameters()))  # 47941632
+    print(sum(p.numel() for p in model.parameters()))  # 38486016
 
 
 if __name__ == '__main__':

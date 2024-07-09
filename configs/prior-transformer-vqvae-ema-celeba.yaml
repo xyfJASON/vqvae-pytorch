@@ -11,7 +11,7 @@ dataloader:
   prefetch_factor: 2
 
 
-model:
+prior:
   target: models.prior.transformer.Transformer
   params:
     codebook_num: 512

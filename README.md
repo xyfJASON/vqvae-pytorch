@@ -150,11 +150,11 @@ accelerate-launch scripts/sample.py -c CONFIG \
     </tr>
     <tr>
         <td style="text-align: center">Transformer + VQVAE (VQ loss)</td>
-        <td style="text-align: center">22.9663</td>
+        <td style="text-align: center">23.7055</td>
     </tr>
     <tr>
         <td style="text-align: center">Transformer + VQVAE (EMA)</td>
-        <td style="text-align: center">25.1638</td>
+        <td style="text-align: center">25.5597</td>
     </tr>
 </table>
 

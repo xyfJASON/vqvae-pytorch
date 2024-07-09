@@ -119,7 +119,7 @@ def main():
     logger.info(f'Successfully load pretrained VQModel from {conf.vqmodel.pretrained}')
 
     # BUILD MODEL AND OPTIMIZERS
-    model = instantiate_from_config(conf.model)
+    model = instantiate_from_config(conf.prior)
     optimizer = instantiate_from_config(conf.train.optim, params=model.parameters())
     logger.info(f'Number of parameters of model: {sum(p.numel() for p in model.parameters()):,}')
     logger.info('=' * 50)
